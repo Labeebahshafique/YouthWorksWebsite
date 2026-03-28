@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Youth Works Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="logo.jpg" alt="Company Logo" class="header-logo">
+                <a href="index.html">Youth Works</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="all_jobs.html">All Jobs</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>No experience? No problem. Start today!</h1>
+            <p>Jobs for students and fresh graduates.</p>
+            <div class="search-bar-container">
+                <input type="text" id="home-job-search-input" placeholder="Job title or skill">
+                <button id="home-search-button">Search</button>
+            </div>
+        </section>
+
+        <section class="job-listings" id="featured-job-listings">
+            <h2>Job listings for youth</h2>
+            <div id="home-job-cards-container"></div>
+            
+            <p id="home-no-jobs-message" style="display: none; text-align: center;">No jobs found in the database.</p>
+            
+            <div class="view-all-button-container">
+                <a href="all_jobs.html" class="view-all-button">View All Jobs</a>
+            </div>
+
+            <div style="background: white; padding: 25px; margin: 40px auto; border-radius: 12px; border: 1px solid #e1e4e8; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-family: sans-serif;">
+                <h3 style="margin-top: 0; color: #0f5194; text-align: center; font-size: 20px;">Post a New Job</h3>
+                
+                <label for="title" style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Job Designation</label>
+                <input type="text" id="title" placeholder="e.g. Software Engineer" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
+                
+                <label for="company" style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Company Name</label>
+                <input type="text" id="company" placeholder="e.g. Youth Works Tech" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
+
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label for="location" style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Office Location</label>
+                        <input type="text" id="location" placeholder="e.g. Lahore, PK" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="salary" style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Monthly Salary (Rs.)</label>
+                        <input type="number" id="salary" placeholder="e.g. 50000" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <label for="category" style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Category</label>
+                <select id="category" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
+                    <option value="Tech">Tech</option>
+                    <option value="Data/Analytics">Data/Analytics</option>
+                    <option value="Education">Education</option>
+                    <option value="Customer Service">Customer Service</option>
+                    <option value="Design">Design</option>
+                </select>
+
+                <label for="details" style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Job Description / Requirements</label>
+                <textarea id="details" rows="3" placeholder="Enter job responsibilities, skills required, etc..." style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: sans-serif; resize: vertical;"></textarea>
+                
+                <button type="button" onclick="addJob()" style="width: 100%; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Publish Job</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Youth Works. All rights reserved.</p>
+    </footer>
+
+    <script>
+     
+        async function loadJobs() {
+            const container = document.getElementById('home-job-cards-container');
+            const noJobsMessage = document.getElementById('home-no-jobs-message');
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/get_jobs');
+                const jobs = await response.json();
+                container.innerHTML = ''; 
+
+                if (!jobs || jobs.length === 0) {
+                    noJobsMessage.style.display = 'block';
+                    return;
+                } else {
+                    noJobsMessage.style.display = 'none';
+                }
+
+                jobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'job-card';
+                    card.innerHTML = `
+                        <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 10px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <h3 style="margin: 0; color: #1a73e8;">${job.jobTitle || job.title}</h3>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold;"> ${job.company || 'Private Company'}</p>
+                            <p style="margin: 5px 0; color: #666;"><strong> Category:</strong> ${job.category || 'General'}</p>
+                            <p style="margin: 5px 0; color: #666;"> ${job.location}</p>
+                            <p style="margin: 5px 0; font-weight: bold; color: #27ae60;">Rs. ${job.salary}</p>
+                            
+                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="apply-button" style="padding: 8px 15px; cursor: pointer; background: #2c3e50; color: white; border: none; border-radius: 5px;">Apply Now</button>
+                                <button onclick="deleteJob(${job.id})" style="padding: 8px 15px; cursor: pointer; background: #ff4d4d; color: white; border: none; border-radius: 5px;">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Load Error:", error);
+                container.innerHTML = "<p style='color:red; text-align:center;'>Error connecting to SQL Database.</p>";
+            }
+        }
+
+        async function addJob() {
+            const title = document.getElementById('title').value;
+            const company = document.getElementById('company').value; 
+            const location = document.getElementById('location').value;
+            const salary = document.getElementById('salary').value;
+            const category = document.getElementById('category').value;
+            const details = document.getElementById('details').value; 
+
+            if (!title || !company || !location || !salary || !category || !details) {
+                alert("Please fill in all fields, including Company and Details!");
+                return;
+            }
+
+            const jobData = {
+                title: title,
+                company: company,   
+                location: location,
+                salary: parseInt(salary),
+                category: category,
+                details: details    
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/add_job', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(jobData)
+                });
+
+                if (response.ok) {
+                    alert(" SUCCESS: Job saved to SQL Database");
+                    window.location.reload(); 
+                } else {
+                    const err = await response.json();
+                    alert(" DATABASE ERROR: " + (err.error || "Check your SQL columns"));
+                }
+            } catch (error) {
+                alert(" CONNECTION ERROR: Is Flask running?");
+            }
+        }
+
+      
+        async function deleteJob(id) {
+            if (confirm("Permanently delete this listing?")) {
+                try {
+                    const response = await fetch(`http://127.0.0.1:5000/api/delete_job/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        loadJobs(); 
+                    }
+                } catch (e) {
+                    alert("Delete failed.");
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadJobs);
+    </script>
+</body>
+</html>

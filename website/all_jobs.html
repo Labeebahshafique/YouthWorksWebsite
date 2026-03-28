@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Jobs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="logo.jpg" alt="Company Logo" class="header-logo">
+                <a href="index.html">Youth Works</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="all_jobs.html">All Jobs</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-small">
+            <h1>Jobs For Youth</h1>
+            <p>Job listings for students and fresh graduates.</p>
+            <div class="search-bar-container">
+                <input type="text" id="job-search-input" placeholder="Search by title, company, or category...">
+                <button id="search-button">Search</button>
+            </div>
+        </section>
+
+        <section class="job-listings">
+            <div id="job-cards-container">
+                </div>
+            <p id="no-jobs-message" style="display: none; text-align: center; margin-top: 20px;">No jobs found matching your search.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Youth Works. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const jobCardsContainer = document.getElementById('job-cards-container');
+            const jobSearchInput = document.getElementById('job-search-input');
+            const searchButton = document.getElementById('search-button');
+            const noJobsMessage = document.getElementById('no-jobs-message');
+
+            let allJobs = []; 
+
+          
+            async function fetchJobsFromDB() {
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/api/get_jobs');
+                    allJobs = await response.json();
+                    displayJobs(allJobs);
+                } catch (error) {
+                    console.error("Error fetching jobs:", error);
+                    jobCardsContainer.innerHTML = "<p style='color:red; text-align:center;'>Unable to connect to the database.</p>";
+                }
+            }
+
+ 
+            function displayJobs(jobsToDisplay) {
+                jobCardsContainer.innerHTML = '';
+                
+                if (jobsToDisplay.length === 0) {
+                    noJobsMessage.style.display = 'block';
+                    return;
+                } else {
+                    noJobsMessage.style.display = 'none';
+                }
+
+                jobsToDisplay.forEach(job => {
+                    const jobCard = document.createElement('div');
+                    jobCard.classList.add('job-card');
+                   
+                    jobCard.innerHTML = `
+                        <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 10px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <h3 style="margin: 0; color: #1a73e8;">${job.jobTitle || job.title}</h3>
+                            <p style="margin: 5px 0; color: #333; font-weight: bold;"> ${job.company || 'Private Company'}</p>
+                            <p style="margin: 5px 0; color: #666; font-size: 0.9em;"> ${job.location} |  ${job.category}</p>
+                            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                            <p style="margin: 10px 0; color: #444; font-size: 0.95em; line-height: 1.5;">${job.details || 'No additional details provided.'}</p>
+                            <p style="margin: 5px 0; font-weight: bold; color: #27ae60; font-size: 1.1em;">Rs. ${job.salary}</p>
+                            <div style="margin-top: 15px;">
+                                <button class="apply-button" style="padding: 10px 20px; cursor: pointer; background: #2c3e50; color: white; border: none; border-radius: 5px; font-weight: bold;">Apply Now</button>
+                            </div>
+                        </div>
+                    `;
+                    jobCardsContainer.appendChild(jobCard);
+                });
+            }
+
+    
+            function filterJobs() {
+                const searchTerm = jobSearchInput.value.toLowerCase().trim();
+                
+                const filtered = allJobs.filter(job => {
+                    const title = (job.jobTitle || job.title || "").toLowerCase();
+                    const company = (job.company || "").toLowerCase();
+                    const category = (job.category || "").toLowerCase();
+                    const location = (job.location || "").toLowerCase();
+
+                    return title.includes(searchTerm) || 
+                           company.includes(searchTerm) || 
+                           category.includes(searchTerm) || 
+                           location.includes(searchTerm);
+                });
+
+                displayJobs(filtered);
+            }
+
+            searchButton.addEventListener('click', filterJobs);
+            jobSearchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') filterJobs();
+            });
+
+            
+            fetchJobsFromDB();
+        });
+    </script>
+</body>
+</html>
+
